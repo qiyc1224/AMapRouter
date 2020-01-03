@@ -5,7 +5,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.res.AssetManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
+import android.view.View;
 import android.widget.TextView;
 
 import com.amap.api.services.core.LatLonPoint;
@@ -13,6 +15,8 @@ import com.lzy.okgo.OkGo;
 import com.lzy.okgo.callback.StringCallback;
 import com.lzy.okgo.model.Response;
 
+import org.apache.poi.hssf.usermodel.HSSFCellStyle;
+import org.apache.poi.hssf.usermodel.HSSFDataFormat;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -21,11 +25,15 @@ import java.util.ArrayList;
 import jxl.Sheet;
 import jxl.Workbook;
 
-public class MainActivity extends AppCompatActivity{
+public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     private static final String TAG = "=====   ";
     private LatLonPoint mStartPoint = new LatLonPoint(39.942295, 116.335891);//起点，116.335891,39.942295
     private LatLonPoint mEndPoint = new LatLonPoint(39.995576, 116.481288);//终点，116.481288,39.995576
-    private TextView mText;
+    private TextView mText1;
+    private TextView mText2;
+    private TextView mText3;
+    private TextView mText4;
+    private TextView mText5;
     String key = "6556860d6cee3cb1d53dc7c4323aeb19";
     String url = "https://restapi.amap.com/v3/direction/transit/integrated?output=json&key=6556860d6cee3cb1d53dc7c4323aeb19";
     String sss = "https://restapi.amap.com/v3/direction/transit/integrated?key=您的key&origin=116.481028,39.989643&destination=116.434446,39.90816&city=北京&cityd=北京&strategy=0&nightflag=0";
@@ -34,23 +42,26 @@ public class MainActivity extends AppCompatActivity{
     String destinationStr = "destination";
     String cityStr = "city";
 
-
-     ;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        mText = (TextView) findViewById(R.id.tv);
+        mText1 = (TextView) findViewById(R.id.tv_1);
+        mText2 = (TextView) findViewById(R.id.tv_2);
+        mText3 = (TextView) findViewById(R.id.tv_3);
+        mText4 = (TextView) findViewById(R.id.tv_4);
+        mText5 = (TextView) findViewById(R.id.tv_5);
 //        getRoad();
 //        getRoat();
 
+        mText5.setMovementMethod(ScrollingMovementMethod.getInstance());
 
-        new Thread(){
-            @Override
-            public void run() {
-                new ExcelDataLoader().execute("Ssss.xls");
-            }
-        }.start();
+        mText1.setOnClickListener(this);
+        mText2.setOnClickListener(this);
+        mText3.setOnClickListener(this);
+        mText4.setOnClickListener(this);
+        mText5.setOnClickListener(this);
+
     }
 
     private void getRoat() {
@@ -139,7 +150,7 @@ public class MainActivity extends AppCompatActivity{
      * @param xlsName excel 表格的名称
      * @param index   第几张表格中的数据
      */
-    private ArrayList<PointModule> getXlsData(String xlsName, int index) {
+    private ArrayList<PointModule> getXlsData(String xlsName, int index,String type) {
         ArrayList<PointModule> pointList = new ArrayList<PointModule>();
         AssetManager assetManager = getAssets();
 
@@ -158,23 +169,73 @@ public class MainActivity extends AppCompatActivity{
 
             for (int i = 0; i < sheetRows; i++) {
                 PointModule countryModel = new PointModule();
-                countryModel.setId(sheet.getCell(0, i).getContents());
-                countryModel.setBianhao(sheet.getCell(1, i).getContents());
-                countryModel.setLonPoint(sheet.getCell(2, i).getContents());
-                countryModel.setLatPoint(sheet.getCell(3, i).getContents());
+
+                countryModel.setId(sheet.getCell(0, i).getContents().replace("数据",""));
+                countryModel.setBianhao(sheet.getCell(1, i).getContents().replace("数据",""));
+                countryModel.setLonPoint(sheet.getCell(2, i).getContents().replace("数据",""));
+                countryModel.setLatPoint(sheet.getCell(3, i).getContents().replace("数据",""));
                 pointList.add(countryModel);
             }
 
             workbook.close();
-
-            for (int i = 0; i < pointList.size(); i++) {
-                Log.d(TAG, "getXlsData:                 "+pointList.get(i).toString());
+            if (type.equals("0")){
+                DataListManager.getInstance().StartPoi.clear();
+                DataListManager.getInstance().StartPoi.addAll(pointList);
+            }else{
+                DataListManager.getInstance().EndPoi.clear();
+                DataListManager.getInstance().EndPoi.addAll(pointList);
             }
+
+
+
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    mText5.setText("加载成功");
+                }
+            });
         } catch (Exception e) {
             Log.e(TAG, "read error=" + e, e);
         }
 
         return pointList;
+    }
+
+    @Override
+    public void onClick(View view) {
+        switch (view.getId()){
+            case R.id.tv_1:
+                new Thread(){
+                    @Override
+                    public void run() {
+                        new ExcelDataLoader().execute("StartPoi.xls","0");
+                    }
+                }.start();
+                break;
+            case R.id.tv_2:
+                new Thread(){
+                    @Override
+                    public void run() {
+                        new ExcelDataLoader().execute("EndPoi.xls","1");
+                    }
+                }.start();
+                break;
+            case R.id.tv_3:
+                mText5.setText("");
+                for (int i = 0; i < DataListManager.getInstance().StartPoi.size(); i++) {
+                   mText5.setText(mText5.getText().toString()+ DataListManager.getInstance().StartPoi.get(i).toString());
+                }
+                break;
+                case R.id.tv_4:
+                    mText5.setText("");
+                    for (int i = 0; i < DataListManager.getInstance().EndPoi.size(); i++) {
+                        mText5.setText(mText5.getText().toString()+ DataListManager.getInstance().EndPoi.get(i).toString());
+                    }
+                break;
+                case R.id.tv_5:
+
+                break;
+        }
     }
 
 
@@ -190,7 +251,7 @@ public class MainActivity extends AppCompatActivity{
 
         @Override
         protected ArrayList<PointModule> doInBackground(String... params) {
-            return getXlsData(params[0], 0);
+            return getXlsData(params[0], 0,params[1]);
         }
 
         @Override
