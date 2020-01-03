@@ -2,48 +2,24 @@ package com.qiyc.daohang;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.content.Context;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.Display;
-import android.view.View;
 import android.widget.TextView;
 
-import com.amap.api.maps2d.AMap;
 import com.amap.api.services.core.LatLonPoint;
-import com.amap.api.services.route.BusRouteResult;
-import com.amap.api.services.route.DriveRouteResult;
-import com.amap.api.services.route.RideRouteResult;
-import com.amap.api.services.route.RouteSearch;
-import com.amap.api.services.route.WalkRouteResult;
-import com.google.gson.Gson;
-import com.google.gson.JsonArray;
 import com.lzy.okgo.OkGo;
-import com.lzy.okgo.callback.AbsCallback;
-import com.lzy.okgo.callback.Callback;
 import com.lzy.okgo.callback.StringCallback;
-import com.lzy.okgo.model.Progress;
 import com.lzy.okgo.model.Response;
-import com.lzy.okgo.request.base.Request;
 
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.IOException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.List;
-import java.util.Locale;
+import java.util.ArrayList;
 
 import jxl.Sheet;
 import jxl.Workbook;
-import okhttp3.MediaType;
-import okhttp3.RequestBody;
-import okio.BufferedSink;
 
 public class MainActivity extends AppCompatActivity{
     private static final String TAG = "=====   ";
@@ -69,6 +45,12 @@ public class MainActivity extends AppCompatActivity{
 //        getRoat();
 
 
+        new Thread(){
+            @Override
+            public void run() {
+                new ExcelDataLoader().execute("Ssss.xls");
+            }
+        }.start();
     }
 
     private void getRoat() {
@@ -157,8 +139,8 @@ public class MainActivity extends AppCompatActivity{
      * @param xlsName excel 表格的名称
      * @param index   第几张表格中的数据
      */
-    private ArrayList<CountryModel> getXlsData(String xlsName, int index) {
-        ArrayList<CountryModel> countryList = new ArrayList<CountryModel>();
+    private ArrayList<PointModule> getXlsData(String xlsName, int index) {
+        ArrayList<PointModule> pointList = new ArrayList<PointModule>();
         AssetManager assetManager = getAssets();
 
         try {
@@ -175,54 +157,57 @@ public class MainActivity extends AppCompatActivity{
             Log.d(TAG, "total cols is 列=" + sheetColumns);
 
             for (int i = 0; i < sheetRows; i++) {
-                CountryModel countryModel = new CountryModel();
-                countryModel.setChinaName(sheet.getCell(0, i).getContents());
-                countryModel.setEnglishName(sheet.getCell(1, i).getContents());
-                countryModel.setAreaNumber(sheet.getCell(2, i).getContents());
-
-                countryList.add(countryModel);
+                PointModule countryModel = new PointModule();
+                countryModel.setId(sheet.getCell(0, i).getContents());
+                countryModel.setBianhao(sheet.getCell(1, i).getContents());
+                countryModel.setLonPoint(sheet.getCell(2, i).getContents());
+                countryModel.setLatPoint(sheet.getCell(3, i).getContents());
+                pointList.add(countryModel);
             }
 
             workbook.close();
 
+            for (int i = 0; i < pointList.size(); i++) {
+                Log.d(TAG, "getXlsData:                 "+pointList.get(i).toString());
+            }
         } catch (Exception e) {
             Log.e(TAG, "read error=" + e, e);
         }
 
-        return countryList;
+        return pointList;
     }
 
 
     //在异步方法中 调用
-    private class ExcelDataLoader extends AsyncTask<String, Void, ArrayList<CountryModel>> {
+    private class ExcelDataLoader extends AsyncTask<String, Void, ArrayList<PointModule>> {
 
         @Override
         protected void onPreExecute() {
-            progressDialog.setMessage("加载中,请稍后......");
-            progressDialog.setCanceledOnTouchOutside(false);
-            progressDialog.show();
+//            progressDialog.setMessage("加载中,请稍后......");
+//            progressDialog.setCanceledOnTouchOutside(false);
+//            progressDialog.show();
         }
 
         @Override
-        protected ArrayList<CountryModel> doInBackground(String... params) {
+        protected ArrayList<PointModule> doInBackground(String... params) {
             return getXlsData(params[0], 0);
         }
 
         @Override
-        protected void onPostExecute(ArrayList<CountryModel> countryModels) {
-            if (progressDialog.isShowing()) {
-                progressDialog.dismiss();
-            }
-
-            if (countryModels != null && countryModels.size() > 0) {
-                //存在数据
-                sortByName(countryModels);
-                setupData(countryModels);
-            } else {
-                //加载失败
-
-
-            }
+        protected void onPostExecute(ArrayList<PointModule> countryModels) {
+//            if (progressDialog.isShowing()) {
+//                progressDialog.dismiss();
+//            }
+//
+//            if (countryModels != null && countryModels.size() > 0) {
+//                //存在数据
+//                sortByName(countryModels);
+//                setupData(countryModels);
+//            } else {
+//                //加载失败
+//
+//
+//            }
 
         }
     }
