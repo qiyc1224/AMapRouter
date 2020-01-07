@@ -88,7 +88,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private void getRoat(final SuperPointsModule spm) {
         try {
             OkGo.<String>get(url + "&" + originStr + "=" + spm.getStartLon() + "," + spm.getStartLat() +
-                    "&" + destinationStr + "=" + spm.getEndLon() + "," + spm.getStartLat() +
+                    "&" + destinationStr + "=" + spm.getEndLon() + "," + spm.getEndLat() +
                     "&" + cityStr + "=" + "0411").execute(new StringCallback() {
                 @Override
                 public void onSuccess(Response<String> response) {
@@ -102,7 +102,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         superPointsModule.setStartLon(spm.getStartLon());
                         superPointsModule.setStartLat(spm.getStartLat());
                         superPointsModule.setEndLon(spm.getEndLon());
-                        superPointsModule.setEndLat(spm.getEndLon());
+                        superPointsModule.setEndLat(spm.getEndLat());
                         JSONObject jsonObject = new JSONObject(response.body());
                         if (jsonObject.has("route")) {
                             JSONObject rout = jsonObject.optJSONObject("route");
@@ -177,12 +177,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         Log.d(TAG, "onSuccess:     第" +index+"次加载成功");
                         Log.d("===", "onSuccess:     " + busStr);
                         DataListManager.getInstance().m1Rr.add(superPointsModule);
-                        if (index==DataListManager.getInstance().m2.size()-1){
+                        if (index==DataListManager.getInstance().m6.size()-1){
+                            generateFinalExcel();
                             return;
                         }
                         index++;
-                        getRoat(DataListManager.getInstance().m2.get(index));
-                        Log.d("===", "onSuccess:     " + busStr);
+                        getRoat(DataListManager.getInstance().m6.get(index));
                     } catch (Exception e) {
                         e.printStackTrace();
                         Log.d("===", "Exception:     " + e.getMessage());
@@ -193,9 +193,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             e.printStackTrace();
         }
     }
-  private void getRoat1(final SuperPointsModule spm) {
+    private void getRoat1(final SuperPointsModule spm) {
         try {
-            OkGo.<String>get("https://restapi.amap.com/v3/direction/transit/integrated?output=json&key=6556860d6cee3cb1d53dc7c4323aeb19&origin=121.544107,38.882001&destination=121.594051,38.882001&city=0411").execute(new StringCallback() {
+            OkGo.<String>get("https://restapi.amap.com/v3/direction/transit/integrated?output=json&key=6556860d6cee3cb1d53dc7c4323aeb19&origin=121.531303,38.883768&destination=121.594141,38.915004&city=0411").execute(new StringCallback() {
                 @Override
                 public void onSuccess(Response<String> response) {
                     Log.d("====", "onSuccess: " + response.body());
@@ -420,16 +420,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         switch (view.getId()) {
             case R.id.tv_1:
 
-                String filePath0 = Environment.getExternalStorageDirectory() + "/$MuMu共享文件夹";
-                File file0 = new File(filePath0);
-                if (!file0.exists()) {
-                    file0.mkdirs();
-                }
-                String excelFileName0 = "/m2rr.xls";
-                filePath0 = filePath0 + excelFileName0;
-                String[] strArr0 = {"序号", "编号", "起点经度", "起点纬度", "终点经度", "终点纬度", "起点步行距离", "换乘步行距离1", "换乘步行距离2", "换乘步行距离3", "换乘步行距离4", "换乘步行距离5", "终点步行距离"};
-                ExcelUtil.initExcel(filePath0, strArr0);
-                ExcelUtil.writeObjListToExcel(DataListManager.getInstance().m1Rr, filePath0, this);
+                generateFinalExcel();
 
                /* new Thread() {
                     @Override
@@ -547,9 +538,22 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
             case R.id.tv_9:
                 //读取m1  加载网络数据
-                getRoat(DataListManager.getInstance().m2.get(index));
+                getRoat(DataListManager.getInstance().m6.get(index));
                 break;
         }
+    }
+
+    private void generateFinalExcel() {
+        String filePath0 = Environment.getExternalStorageDirectory() + "/$MuMu共享文件夹";
+        File file0 = new File(filePath0);
+        if (!file0.exists()) {
+            file0.mkdirs();
+        }
+        String excelFileName0 = "/m6rr.xls";
+        filePath0 = filePath0 + excelFileName0;
+        String[] strArr0 = {"序号", "编号", "起点经度", "起点纬度", "终点经度", "终点纬度", "起点步行距离", "换乘步行距离1", "换乘步行距离2", "换乘步行距离3", "换乘步行距离4", "换乘步行距离5", "终点步行距离"};
+        ExcelUtil.initExcel(filePath0, strArr0);
+        ExcelUtil.writeObjListToExcel(DataListManager.getInstance().m1Rr, filePath0, this);
     }
 
     int count = 1;
