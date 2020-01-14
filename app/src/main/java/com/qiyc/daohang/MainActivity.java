@@ -174,15 +174,41 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                 }
                             }
                         }
-                        Log.d(TAG, "onSuccess:     第" +index+"次加载成功");
+                        Log.d(TAG, "onSuccess:当前count是"+count+"  第" +index+"次加载成功");
                         Log.d("===", "onSuccess:     " + busStr);
                         DataListManager.getInstance().m1Rr.add(superPointsModule);
-                        if (index==DataListManager.getInstance().m6.size()-1){
-                            generateFinalExcel();
-                            return;
+                        if (count==1||count==2||count==3||count==4||count==5){
+                            if (index==DataListManager.getInstance().m1.size()-1){
+                                generateFinalExcel();
+                                return;
+                            }
+                        }else if (count==6){
+                            if (index==DataListManager.getInstance().m6.size()-1){
+                                generateFinalExcel();
+                                return;
+                            }
+                        }else if (count==7){
+                            if (index==DataListManager.getInstance().m7.size()-1){
+                                generateFinalExcel();
+                                return;
+                            }
                         }
                         index++;
-                        getRoat(DataListManager.getInstance().m6.get(index));
+                        if (count==1){
+                            getRoat(DataListManager.getInstance().m1.get(index));
+                        }else if (count==2){
+                            getRoat(DataListManager.getInstance().m2.get(index));
+                        }else if (count==3){
+                            getRoat(DataListManager.getInstance().m3.get(index));
+                        }else if (count==4){
+                            getRoat(DataListManager.getInstance().m4.get(index));
+                        }else if (count==5){
+                            getRoat(DataListManager.getInstance().m5.get(index));
+                        }else if (count==6){
+                            getRoat(DataListManager.getInstance().m6.get(index));
+                        }else if (count==7){
+                            getRoat(DataListManager.getInstance().m7.get(index));
+                        }
                     } catch (Exception e) {
                         e.printStackTrace();
                         Log.d("===", "Exception:     " + e.getMessage());
@@ -380,28 +406,32 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
 
             workbook.close();
-
-            for (int i = 0; i < 5000; i++) {
-                DataListManager.getInstance().m1.add(pointList.get(i));
+            DataListManager.getInstance().m7.addAll(pointList);
+            for (int i = 0; i < DataListManager.getInstance().m7.size(); i++) {
+                Log.d(TAG, "getExcelData: "+i +"     "+DataListManager.getInstance().m7.get(i).getId()+"   "+DataListManager.getInstance().m7.get(i).getBianhao());
             }
-            for (int i = 5000; i < 10000; i++) {
-                DataListManager.getInstance().m2.add(pointList.get(i));
-            }
-            for (int i = 10000; i < 15000; i++) {
-                DataListManager.getInstance().m3.add(pointList.get(i));
-            }
-            for (int i = 15000; i < 20000; i++) {
-                DataListManager.getInstance().m4.add(pointList.get(i));
-            }
-            for (int i = 20000; i < 25000; i++) {
-                DataListManager.getInstance().m5.add(pointList.get(i));
-            }
-            for (int i = 25000; i < pointList.size(); i++) {
-                DataListManager.getInstance().m6.add(pointList.get(i));
-            }
+//
+//            for (int i = 0; i < 5000; i++) {
+//                DataListManager.getInstance().m1.add(pointList.get(i));
+//            }
+//            for (int i = 5000; i < 10000; i++) {
+//                DataListManager.getInstance().m2.add(pointList.get(i));
+//            }
+//            for (int i = 10000; i < 15000; i++) {
+//                DataListManager.getInstance().m3.add(pointList.get(i));
+//            }
+//            for (int i = 15000; i < 20000; i++) {
+//                DataListManager.getInstance().m4.add(pointList.get(i));
+//            }
+//            for (int i = 20000; i < 25000; i++) {
+//                DataListManager.getInstance().m5.add(pointList.get(i));
+//            }
+//            for (int i = 25000; i < pointList.size(); i++) {
+//                DataListManager.getInstance().m6.add(pointList.get(i));
+//            }
 
             Log.d(TAG, "getExcelData:   "+DataListManager.getInstance().m1.size()+" "+DataListManager.getInstance().m2.size()+" "+DataListManager.getInstance().m3.size()+" "
-                    +DataListManager.getInstance().m4.size()+" "+DataListManager.getInstance().m5.size()+" "+DataListManager.getInstance().m6.size()+" ");
+                    +DataListManager.getInstance().m4.size()+" "+DataListManager.getInstance().m5.size()+" "+DataListManager.getInstance().m6.size()+" "+DataListManager.getInstance().m7.size());
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -483,7 +513,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 new Thread() {
                     @Override
                     public void run() {
-                        new ExcelDataLoaderMore().execute("demo.xls", "0");
+                        new ExcelDataLoaderMore().execute("m7.xls", "0");
                     }
                 }.start();
                 break;
@@ -538,7 +568,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
             case R.id.tv_9:
                 //读取m1  加载网络数据
-                getRoat(DataListManager.getInstance().m6.get(index));
+                if (count==1){
+                    getRoat(DataListManager.getInstance().m1.get(index));
+                }else if (count==2){
+                    getRoat(DataListManager.getInstance().m2.get(index));
+                }else if (count==3){
+                    getRoat(DataListManager.getInstance().m3.get(index));
+                }else if (count==4){
+                    getRoat(DataListManager.getInstance().m4.get(index));
+                }else if (count==5){
+                    getRoat(DataListManager.getInstance().m5.get(index));
+                }else if (count==6){
+                    getRoat(DataListManager.getInstance().m6.get(index));
+                }else if (count==7){
+                    getRoat(DataListManager.getInstance().m7.get(index));
+                }
                 break;
         }
     }
@@ -549,14 +593,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (!file0.exists()) {
             file0.mkdirs();
         }
-        String excelFileName0 = "/m6rr.xls";
+        String excelFileName0 = "/m"+count+"rr.xls";
         filePath0 = filePath0 + excelFileName0;
-        String[] strArr0 = {"序号", "编号", "起点经度", "起点纬度", "终点经度", "终点纬度", "起点步行距离", "换乘步行距离1", "换乘步行距离2", "换乘步行距离3", "换乘步行距离4", "换乘步行距离5", "终点步行距离"};
+        String[] strArr0 = {"序号", "编号", "起点经度", "起点纬度", "终点经度", "终点纬度","路线总长度","起点步行距离", "换乘步行距离1", "换乘步行距离2", "换乘步行距离3", "换乘步行距离4", "换乘步行距离5", "终点步行距离"};
         ExcelUtil.initExcel(filePath0, strArr0);
         ExcelUtil.writeObjListToExcel(DataListManager.getInstance().m1Rr, filePath0, this);
     }
 
-    int count = 1;
+    int count = 7;
 
 
     //在异步方法中 调用

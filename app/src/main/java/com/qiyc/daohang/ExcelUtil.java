@@ -296,6 +296,7 @@ public class ExcelUtil {
                     list.add(projectBean.getStartLat());
                     list.add(projectBean.getEndLon());
                     list.add(projectBean.getEndLat());
+                    list.add(projectBean.getTotalDis());
                     list.add(projectBean.getStartDis());
                     list.add(projectBean.getTranDis1());
                     list.add(projectBean.getTranDis2());

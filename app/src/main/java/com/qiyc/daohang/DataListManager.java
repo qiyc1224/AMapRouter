@@ -35,6 +35,7 @@ public class DataListManager {
     public ArrayList<SuperPointsModule> m4 = new ArrayList<>();
     public ArrayList<SuperPointsModule> m5 = new ArrayList<>();
     public ArrayList<SuperPointsModule> m6 = new ArrayList<>();
+    public ArrayList<SuperPointsModule> m7 = new ArrayList<>();
 
 
 
